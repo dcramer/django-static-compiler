@@ -3,8 +3,8 @@ django-static-compiler
 
 A static files compiler (JavaScript, CSS, et all) which aims to solve two things:
 
-# Distributed compressed and uncompresed files with third party applications.
-# Simple compression of project-wide static files
+1. Distributed compressed and uncompresed files with third party applications.
+2. Simple compression of project-wide static files
 
 Compiled Distributions
 ----------------------
