@@ -42,9 +42,16 @@ The configration would describe bunches:
 ::
 
     {
-        'js': {
-            'src': ['foo.js'],
-            'dst': 'foo.min.js',
+        'packages': {
+            'bunchname.js': {
+                'src': ['foo.js']
+            }
+        },
+        postcompilers: {
+            '*.js': ['uglifyjs %(in) %(out)']
+        }
+        precompilers: {
+            '*.less': ['lessc %(in) %(out)']
         }
     }
 
@@ -55,7 +62,7 @@ Similar to django-pipeline:
 
 ::
 
-    {% staticfile 'bunchname' %}
+    {% staticfile 'bunchname.js' %}
 
 
 Staticfiles Collection
