@@ -43,9 +43,8 @@ The configration would describe bunches:
 
     {
         'js': {
-            'type': 'text/javascript',
             'src': ['foo.js'],
-            'dst': ['foo.min.js'],
+            'dst': 'foo.min.js',
         }
     }
 
@@ -81,5 +80,5 @@ Some questions which need answered:
 - Is there a better way to do a library's static compilation configuration?
   - e.g. we could do sentry.staticfiles (a python module), but that's kind of gross
 - Are there any problems with the staticfiles finders that might conflict here?
-- How should types be handled?
+- Is it fine to infer content type from destination file?
 - What's the ideal way to handle pre/post compilers?
