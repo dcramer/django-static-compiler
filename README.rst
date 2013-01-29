@@ -65,19 +65,37 @@ Similar to django-pipeline:
     {% staticfile 'bunchname.js' %}
 
 
-Staticfiles Collection
-----------------------
+Staticfiles Collection and Compiliation
+---------------------------------------
 
-Assuming something like the application staticfiles finder, it would iterate all applications, and look for the
-application's configuration.
+First, the compilation phase happens. This would happen either within the 3rd party app or the project (or potentially
+both).
 
-- If DEBUG was enabled, we would return uncompiled resources
-- Else if compiled resources available, return them
-- Else if compilers available (e.g. lessc), compile resources
-- Else return uncompiled resources
+- Run manage.py compilestatic
+- It iterates your staticfiles finders, finds configurations, and compiles the static files into the relative
+  locations.
 
-This would both influence what ends up in collectstatic as well as what the staticfile templatetags would return. It's
-likely we'd generate a manifest (similar to compressor) which described the results of this action.
+It's important to note, that the configuration file would be relative to the directory, and potentially we should support
+inclusion of files from apps (e.g. at the project level). For example, my app might want to do this:
+
+::
+
+    # sentry/static/static.json
+    {
+        'packages': {
+            'global.js': {
+                'src': ['/sentry/js/foo.js', '/jquery/jquery.js']
+            }
+        },
+    }
+
+(Imagine there was a django-jquery which just had this static file available.)
+
+We'd generate a manifest (similar to compressor) which described the results of this action, so we'd know which
+compiled files are available, and which aren't. This would handle cases where an application didn't distribute
+compiled files and your system isnt configured with the nescesary tools to compile them.
+
+Once we've dealt w/ compilation, the staticfiles finder would work as expected.
 
 TODO / Questions
 ----------------
