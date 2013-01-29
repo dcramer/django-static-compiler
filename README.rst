@@ -13,17 +13,19 @@ Static files are stored relative to their root:
 
 ::
 
-    [site]/sentry/static/sentry/js/foo.js
-    [site]/sentry/static/sentry/js/bar.js
-    [site]/otherapp/static/otherapp/css/bar.css
+    [site-packages]/sentry/static/sentry/js/foo.js
+    [site-packages]/sentry/static/sentry/js/bar.js
+    [site-packages]/otherapp/static/otherapp/css/bar.css
 
 Each application would be compiled independently, based on its own configuration, and you'd end up with something
 like the following:
 
 ::
 
-    [site]/sentry/static/sentry/dist/js/all.min.js
-    [site]/otherapp/static/otherapp/dist/css/bar.min.css
+    [site-packages]/sentry/static/sentry/dist/js/all.min.js
+    [site-packages]/otherapp/static/otherapp/dist/css/bar.min.css
+
+Eventually these would be collected (using standard staticfiles) in your project static directory.
 
 
 Application Configuration
@@ -33,7 +35,7 @@ Configuration would be handled via a configuration file located in the applicati
 
 ::
 
-    [site]/static/static.json
+    [site-packages]/static/static.json
 
 The configration would describe bunches:
 
