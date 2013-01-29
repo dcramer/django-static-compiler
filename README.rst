@@ -89,3 +89,5 @@ Some questions which need answered:
 - Are there any problems with the staticfiles finders that might conflict here?
 - Is it fine to infer content type from destination file?
 - What's the ideal way to handle pre/post compilers?
+- What about situations where you don't want to write the output to disk?
+- How can we handle project-wide staticfiles? e.g. I want to compile together sentry's XYZ and otherapp's XYZ for my project.
