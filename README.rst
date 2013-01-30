@@ -12,7 +12,7 @@ sourcemap generation.
 Compiled Distributions
 ----------------------
 
-Static files are stored relative to their root:
+Static files are stored relative to their configuration root:
 
 ::
 
@@ -58,7 +58,24 @@ The configration would describe bunches:
         }
     }
 
-We'd make several variables available:
+There are three top level attributes:
+
+packages
+  a mapping of bunches to their options (options can include top level options as well)
+precompilers
+  a mapping of input grep patterns to a list of (ordered) commands to execute on files
+  in all situations (including DEBUG use).
+postcompilers
+  a mapping of input grep patterns to a list of (ordered) commands to execute on files
+  which are designated for distribution (e.g. not DEBUG use).
+
+The packages attribute accepts the following:
+
+src
+  a list of source files to include in this bunch. These will get compiled together when
+  generating a compressed manifest
+
+We'd make several variables available to post- and precompilers:
 
 input
   absolute path to input file
@@ -79,7 +96,7 @@ File Locations
 The configuration file can be placed within any directory, which makes the compiled bunchname and it's
 files relative to the directory.
 
-For example, if you have this in /static/sentry/packages.json:
+For example, if you have this in /assets/sentry/packages.json:
 
 ::
 
@@ -100,6 +117,8 @@ The resulting use of this in a template would specify global.js relative to the 
 
     {% staticfile 'sentry/global.js' %}
 
+This file would actually have been generated and stored in /assets/sentry/global.VERSION.js.
+
 Staticfiles Collection and Compiliation
 ---------------------------------------
 
@@ -116,6 +135,16 @@ compiled files and your system isnt configured with the nescesary tools to compi
 
 Once we've dealt w/ compilation, the staticfiles finder would work as expected.
 
+Manifest
+~~~~~~~~
+
+The manifest will be generated at STATIC_ROOT/manifest.json. It contains a mapping of bunchname -> version. If this
+file is not present, we assume postprocessors have not been run, and we fall back to simply outputting the (expected)
+precompiled version.
+
+For example, if we had foo.less and bar.less, in the "styles.css" bunch, we'd infer the content type to be a CSS file,
+and we'd expect foo.css and bar.css to exist.
+
 PreProcessors
 ~~~~~~~~~~~~~
 
@@ -127,9 +156,7 @@ modified time, and we'd recompile whenever that value is changed.
 
 When preprocessing happens each input file is transformed to an output file (using the standard versioning scheme). For
 example, if I had a bunch that included foo.less and bar.less, each would be compiled separately, and I'd end up with
-two output files: foo.VERSION.css, and bar.VERSION.css.
-
-TODO: should we really include VERSION In the preprocessed output?
+two output files: foo.css, and bar.css.
 
 PostProcessors
 ~~~~~~~~~~~~~~
