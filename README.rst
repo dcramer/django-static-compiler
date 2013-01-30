@@ -60,17 +60,17 @@ The configration would describe bunches:
 
 We'd make several variables available:
 
-input:
+input
   absolute path to input file
-output:
+output
   absolute path to output file
-version:
+version
   the generated version identifier (this is a checksum of the input file(s))
-ext:
+ext
   output extension (e.g. .js)
-name:
+name
   extensionless filename from output (e.g. bunchname)
-filename:
+filename
   full output filename (e.g. bunchname.VERSION.js)
 
 File Locations
@@ -88,7 +88,7 @@ For example, if you have this in /static/sentry/packages.json:
             'global.js': {
                 'src': ['js/foo.js', '/jquery/jquery.js']
             }
-        },
+        }
     }
 
 We would end up with a single output file located in /static/sentry/global.js, which is a combination of
@@ -140,7 +140,7 @@ For example, if it runs against foo.js and bar.js, it will output bunchname.VERS
 Template Usage
 --------------
 
-Similar to django-pipeline:
+Specify the relative path to the bunch name (relative to the static root):
 
 ::
 
