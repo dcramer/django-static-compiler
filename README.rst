@@ -138,12 +138,15 @@ Once we've dealt w/ compilation, the staticfiles finder would work as expected.
 Manifest
 ~~~~~~~~
 
-The manifest will be generated at STATIC_ROOT/manifest.json. It contains a mapping of bunchname -> version. If this
-file is not present, we assume postprocessors have not been run, and we fall back to simply outputting the (expected)
+The manifest will be generated at STATIC_ROOT/manifest.json. It contains a mapping of bunchname -> version. An application
+would be able to provide a manifest by having it generated and distributed in appname/manifest.json.
+
+If this file is not present, we assume postprocessors have not been run, and we fall back to simply outputting the (expected)
 precompiled version.
 
 For example, if we had foo.less and bar.less, in the "styles.css" bunch, we'd infer the content type to be a CSS file,
 and we'd expect foo.css and bar.css to exist.
+
 
 PreProcessors
 ~~~~~~~~~~~~~
