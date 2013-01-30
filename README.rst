@@ -60,12 +60,18 @@ The configration would describe bunches:
 
 We'd make several variables available:
 
-- input: absolute path to input file
-- output: absolute path to output file
-- version: the generated version identifier
-- ext: output extension (e.g. .js)
-- name: extensionless filename from output (e.g. bunchname)
-- filename: full output filename (e.g. bunchname.VERSION.js)
+input:
+  absolute path to input file
+output:
+  absolute path to output file
+version:
+  the generated version identifier
+ext:
+  output extension (e.g. .js)
+name:
+  extensionless filename from output (e.g. bunchname)
+filename:
+  full output filename (e.g. bunchname.VERSION.js)
 
 Template Usage
 --------------
