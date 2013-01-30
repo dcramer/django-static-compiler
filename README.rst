@@ -72,8 +72,7 @@ postcompilers
 The packages attribute accepts the following:
 
 src
-  a list of source files to include in this bunch. These will get compiled together when
-  generating a compressed manifest
+  a list of source files to include in this bunch
 
 We'd make several variables available to post- and precompilers:
 
@@ -81,14 +80,12 @@ input
   absolute path to input file
 output
   absolute path to output file
-version
-  the generated version identifier (this is a checksum of the input file(s))
 ext
   output extension (e.g. .js)
 name
   extensionless filename from output (e.g. bunchname)
 filename
-  full output filename (e.g. bunchname.VERSION.js)
+  full output filename (e.g. bunchname.js)
 
 File Locations
 ~~~~~~~~~~~~~~
@@ -117,7 +114,7 @@ The resulting use of this in a template would specify global.js relative to the 
 
     {% staticfile 'sentry/global.js' %}
 
-This file would actually have been generated and stored in /assets/sentry/global.VERSION.js.
+This file would actually have been generated and stored in /assets/sentry/global.js.
 
 Staticfiles Collection and Compiliation
 ---------------------------------------
@@ -129,24 +126,7 @@ both).
 - It iterates your staticfiles finders, finds configurations, and compiles the static files into the relative
   locations.
 
-We'd generate a manifest (similar to compressor) which described the results of this action, so we'd know which
-compiled files are available, and which aren't. This would handle cases where an application didn't distribute
-compiled files and your system isnt configured with the nescesary tools to compile them.
-
 Once we've dealt w/ compilation, the staticfiles finder would work as expected.
-
-Manifest
-~~~~~~~~
-
-The manifest will be generated at STATIC_ROOT/manifest.json. It contains a mapping of bunchname -> version. An application
-would be able to provide a manifest by having it generated and distributed in appname/manifest.json.
-
-If this file is not present, we assume postprocessors have not been run, and we fall back to simply outputting the (expected)
-precompiled version.
-
-For example, if we had foo.less and bar.less, in the "styles.css" bunch, we'd infer the content type to be a CSS file,
-and we'd expect foo.css and bar.css to exist.
-
 
 PreProcessors
 ~~~~~~~~~~~~~
@@ -166,7 +146,7 @@ PostProcessors
 
 A post-process runs on pre-processed inputs and is expected to concatenate the results together into a unified file.
 
-For example, if it runs against foo.js and bar.js, it will output bunchname.VERSION.js.
+For example, if it runs against foo.js and bar.js, it will output bunchname.js.
 
 
 Template Usage
