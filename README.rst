@@ -51,12 +51,21 @@ The configration would describe bunches:
             }
         },
         postcompilers: {
-            '*.js': ['uglifyjs %(in) %(out)']
+            '*.js': ['uglifyjs %(input)s %(output)s']
         }
         precompilers: {
-            '*.less': ['lessc %(in) %(out)']
+            '*.less': ['lessc %(input)s %(output)s']
         }
     }
+
+We'd make several variables available:
+
+- input: absolute path to input file
+- output: absolute path to output file
+- version: the generated version identifier
+- ext: output extension (e.g. .js)
+- name: extensionless filename from output (e.g. bunchname)
+- filename: full output filename (e.g. bunchname.VERSION.js)
 
 Template Usage
 --------------
