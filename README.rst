@@ -65,23 +65,13 @@ input:
 output:
   absolute path to output file
 version:
-  the generated version identifier
+  the generated version identifier (this is a checksum of the input file(s))
 ext:
   output extension (e.g. .js)
 name:
   extensionless filename from output (e.g. bunchname)
 filename:
   full output filename (e.g. bunchname.VERSION.js)
-
-Template Usage
---------------
-
-Similar to django-pipeline:
-
-::
-
-    {% staticfile 'bunchname.js' %}
-
 
 Staticfiles Collection and Compiliation
 ---------------------------------------
@@ -115,15 +105,32 @@ compiled files and your system isnt configured with the nescesary tools to compi
 
 Once we've dealt w/ compilation, the staticfiles finder would work as expected.
 
-TODO / Questions
-----------------
+PreProcessors
+~~~~~~~~~~~~~
 
-Some questions which need answered:
+A pre-processor will **always** be run. This is nearly always a requirement as things like LESS files have to be processed
+befor they can be served in a browser.
 
-- Is there a better way to do a library's static compilation configuration?
-  - e.g. we could do sentry.staticfiles (a python module), but that's kind of gross
-- Are there any problems with the staticfiles finders that might conflict here?
-- Is it fine to infer content type from destination file?
-- What's the ideal way to handle pre/post compilers?
-- What about situations where you don't want to write the output to disk?
-- How can we handle project-wide staticfiles? e.g. I want to compile together sentry's XYZ and otherapp's XYZ for my project.
+In debug mode, or more specifically when the Python code is serving the staticfiles, we would store each file in a bunches
+modified time, and we'd recompile whenever that value is changed.
+
+When preprocessing happens each input file is transformed to an output file (using the standard versioning scheme). For
+example, if I had a bunch that included foo.less and bar.less, each would be compiled separately, and I'd end up with
+two output files: foo.VERSION.css, and bar.VERSION.css.
+
+PostProcessors
+~~~~~~~~~~~~~~
+
+A post-process runs on pre-processed inputs and is expected to concatenate the results together into a unified file.
+
+For example, if it runs against foo.js and bar.js, it will output bunchname.VERSION.js.
+
+
+Template Usage
+--------------
+
+Similar to django-pipeline:
+
+::
+
+    {% staticfile 'bunchname.js' %}
