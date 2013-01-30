@@ -38,7 +38,7 @@ Configuration would be handled via a configuration file located in the applicati
 
 ::
 
-    [site-packages]/static/static.json
+    [site-packages]/static/packages.json
 
 The configration would describe bunches:
 
@@ -52,7 +52,7 @@ The configration would describe bunches:
         },
         postcompilers: {
             '*.js': ['uglifyjs %(input)s %(output)s']
-        }
+        },
         precompilers: {
             '*.less': ['lessc %(input)s %(output)s']
         }
@@ -73,6 +73,33 @@ name:
 filename:
   full output filename (e.g. bunchname.VERSION.js)
 
+File Locations
+~~~~~~~~~~~~~~
+
+The configuration file can be placed within any directory, which makes the compiled bunchname and it's
+files relative to the directory.
+
+For example, if you have this in /static/sentry/packages.json:
+
+::
+
+    {
+        'packages': {
+            'global.js': {
+                'src': ['js/foo.js', '/jquery/jquery.js']
+            }
+        },
+    }
+
+We would end up with a single output file located in /static/sentry/global.js, which is a combination of
+/static/sentry/js/foo.js and /static/jquery/jquery.js (which is likely provided by a dependency).
+
+The resulting use of this in a template would specify global.js relative to the packages.json:
+
+::
+
+    {% staticfile 'sentry/global.js' %}
+
 Staticfiles Collection and Compiliation
 ---------------------------------------
 
@@ -82,22 +109,6 @@ both).
 - Run manage.py compilestatic
 - It iterates your staticfiles finders, finds configurations, and compiles the static files into the relative
   locations.
-
-It's important to note, that the configuration file would be relative to the directory, and potentially we should support
-inclusion of files from apps (e.g. at the project level). For example, my app might want to do this:
-
-::
-
-    # sentry/static/static.json
-    {
-        'packages': {
-            'global.js': {
-                'src': ['/sentry/js/foo.js', '/jquery/jquery.js']
-            }
-        },
-    }
-
-(Imagine there was a django-jquery which just had this static file available.)
 
 We'd generate a manifest (similar to compressor) which described the results of this action, so we'd know which
 compiled files are available, and which aren't. This would handle cases where an application didn't distribute
