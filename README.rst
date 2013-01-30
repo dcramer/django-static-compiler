@@ -129,6 +129,8 @@ When preprocessing happens each input file is transformed to an output file (usi
 example, if I had a bunch that included foo.less and bar.less, each would be compiled separately, and I'd end up with
 two output files: foo.VERSION.css, and bar.VERSION.css.
 
+TODO: should we really include VERSION In the preprocessed output?
+
 PostProcessors
 ~~~~~~~~~~~~~~
 
