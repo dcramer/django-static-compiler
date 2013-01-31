@@ -37,6 +37,14 @@ class Command(BaseCommand):
             static_root=os.path.abspath(settings.STATIC_ROOT),
         )
 
+    def parse_command(self, cmd, **params):
+        parsed_cmd = shlex.split(str(cmd).format(**params))
+        # force absolute path to binary
+        parsed_cmd[0] = os.path.abspath(parsed_cmd[0])
+
+        # TODO: why is uglify hanging when we pass the command as a list?
+        return ' '.join(parsed_cmd)
+
     def apply_preprocessors(self, root, src, dst, processors):
         """
         Preprocessors operate based on the source filename, and apply to each
@@ -51,12 +59,7 @@ class Command(BaseCommand):
         src_path = src
         for pattern, cmd_list in matches:
             for cmd in cmd_list:
-                parsed_cmd = shlex.split(str(cmd).format(input=src_path, **params))
-                # force absolute path to binary
-                parsed_cmd[0] = os.path.abspath(parsed_cmd[0])
-
-                # TODO: why is uglify hanging when we pass the command as a list?
-                parsed_cmd = ' '.join(parsed_cmd)
+                parsed_cmd = self.parse_command(input=src_path, **params)
 
                 print " ->", parsed_cmd
                 proc = subprocess.Popen(
@@ -97,12 +100,7 @@ class Command(BaseCommand):
         src_names = src_list
         for pattern, cmd_list in processors.iteritems():
             for cmd in cmd_list:
-                parsed_cmd = shlex.split(str(cmd).format(input=' '.join(src_names), **params))
-                # force absolute path to binary
-                parsed_cmd[0] = os.path.abspath(parsed_cmd[0])
-
-                # TODO: why is uglify hanging when we pass the command as a list?
-                parsed_cmd = ' '.join(parsed_cmd)
+                parsed_cmd = self.parse_command(input=' '.join(src_names), **params)
 
                 print " ->", parsed_cmd
                 proc = subprocess.Popen(
