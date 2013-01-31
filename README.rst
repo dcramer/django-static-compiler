@@ -150,9 +150,6 @@ PreProcessors
 A pre-processor will **always** be run. This is nearly always a requirement as things like LESS files have to be processed
 befor they can be served in a browser.
 
-In debug mode, or more specifically when the Python code is serving the staticfiles, we would store each file in a bunches
-modified time, and we'd recompile whenever that value is changed.
-
 When preprocessing happens each input file is transformed to an output file (using the standard versioning scheme). For
 example, if I had a bunch that included foo.less and bar.less, each would be compiled separately, and I'd end up with
 two output files: foo.css, and bar.css.
@@ -164,6 +161,8 @@ A post-process runs on pre-processed inputs and is expected to concatenate the r
 
 For example, if it runs against foo.js and bar.js, it will output bunchname.js.
 
+If no post-processors happen, the result would be similar to the following: cat [input, input, input] > output
+
 
 Template Usage
 --------------
@@ -174,6 +173,13 @@ Specify the relative path to the bunch name (relative to the static root):
 
     {% staticfile 'bunchname.js' %}
 
+In development/debug mode, the following happens:
+
+1. Determines if it needs to recompile any files (based on its last modified time)
+2. Serves the preprocessed but not compiled files (turning this into many html tags).
+
+Otherwise it simply acts as a proxy to the Django {% static %} templatetag with the inclusion of script/link/etc
+HTML tags.
 
 TODO
 ----
