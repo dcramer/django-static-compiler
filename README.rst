@@ -34,11 +34,7 @@ Eventually these would be collected (using standard staticfiles) in your project
 Application Configuration
 -------------------------
 
-Configuration would be handled via a configuration file located in the application's static directory (via staticfiles):
-
-::
-
-    [site-packages]/static/packages.json
+Configuration is handled via the STATIC_BUNDLES setting, in settings.py.
 
 An example configuration might look like this:
 
@@ -97,40 +93,12 @@ input
 ext
   output extension (e.g. .js)
 name
-  extensionless filename from output (e.g. bunchname)
+  extensionless filename from output (e.g. bundle)
 filename
-  full output filename (e.g. bunchname.js)
+  full output filename (e.g. bundle.js)
 path
   full output dir path (e.g. foo/bar)
 
-File Locations
-~~~~~~~~~~~~~~
-
-The configuration file can be placed within any directory, which makes the compiled bunchname and it's
-files relative to the directory.
-
-For example, if you have this in /assets/sentry/packages.json:
-
-::
-
-    {
-        'packages': {
-            'global.js': {
-                'src': ['js/foo.js', '/jquery/jquery.js']
-            }
-        }
-    }
-
-We would end up with a single output file located in /static/sentry/global.js, which is a combination of
-/static/sentry/js/foo.js and /static/jquery/jquery.js (which is likely provided by a dependency).
-
-The resulting use of this in a template would specify global.js relative to the packages.json:
-
-::
-
-    {% staticfile 'sentry/global.js' %}
-
-This file would actually have been generated and stored in /assets/sentry/global.js.
 
 Staticfiles Collection and Compiliation
 ---------------------------------------
@@ -159,7 +127,7 @@ PostProcessors
 
 A post-process runs on pre-processed inputs and is expected to concatenate the results together into a unified file.
 
-For example, if it runs against foo.js and bar.js, it will output bunchname.js.
+For example, if it runs against foo.js and bar.js, it will output bundle.js.
 
 If no post-processors happen, the result would be similar to the following: cat [input, input, input] > output
 
@@ -171,14 +139,18 @@ Specify the relative path to the bunch name (relative to the static root):
 
 ::
 
-    {% staticfile 'bunchname.js' %}
+    {% staticbundle 'bundle.js' %}
 
-In development/debug mode, the following happens:
+If we're in DEBUG / development mode and 'bundle.js' is defined in STATIC_BUNDLES:
 
 1. Determines if it needs to recompile any files (based on its last modified time)
 2. Serves the preprocessed but not compiled files (turning this into many html tags).
 
-Otherwise it simply acts as a proxy to the Django {% static %} templatetag with the inclusion of script/link/etc
+Otherwise:
+
+1. Serve bundle.js (assumed to exist)
+
+In general it simply acts as a proxy to the Django {% static %} templatetag with the inclusion of script/link/etc
 HTML tags.
 
 TODO

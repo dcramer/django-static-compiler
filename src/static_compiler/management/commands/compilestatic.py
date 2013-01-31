@@ -5,7 +5,6 @@ from fnmatch import fnmatch
 from django.conf import settings
 from django.contrib.staticfiles import finders
 from django.core.management.base import BaseCommand
-from django.utils import simplejson
 from django.utils.datastructures import SortedDict
 
 
@@ -17,23 +16,22 @@ def find_static_files(ignore_patterns=()):
     return found_files
 
 
-def read_package_config(path):
-    with open(path) as fp:
-        data = simplejson.load(fp)
-    return data
-
-
 class Command(BaseCommand):
     def get_format_params(self, dst):
-        dst_filename = os.path.basename(dst)
-        dst_path = os.path.dirname(dst)
-        dst_basename, dst_ext = os.path.splitext(dst_filename)
+        filename = os.path.basename(dst)
+        path = os.path.dirname(dst)
+        basename, ext = os.path.splitext(filename)
+        if path.startswith(settings.STATIC_ROOT):
+            relpath = path[len(settings.STATIC_ROOT) + 1:]
+        else:
+            relpath = path
 
         return dict(
-            name=dst_basename,
-            ext=dst_ext,
-            filename=dst_filename,
-            path=dst_path,
+            name=basename,
+            ext=ext,
+            filename=filename,
+            relpath=relpath,
+            abspath=path,
             static_root=os.path.abspath(settings.STATIC_ROOT),
         )
 
@@ -111,38 +109,32 @@ class Command(BaseCommand):
                 src_names = [dst]
 
     def handle(self, *args, **options):
-        # TODO: wtf is a prefixed path
+        config = settings.STATIC_BUNDLES
+        if not config:
+            return
 
         # First we need to build a mapping of all files using django.contrib.staticfiles
         bundle_mapping = {}
 
-        found_files = find_static_files()
-        for rel_path, abs_path in found_files.iteritems():
-            if not rel_path.endswith('packages.json'):
-                continue
-
-            config = read_package_config(abs_path)
-            for bundle_name, options in config.get('packages', {}).iteritems():
-                options['path'] = os.path.dirname(abs_path)
-                options['ext'] = os.path.splitext(bundle_name)[1]
-                options.setdefault('preprocessors', config.get('preprocessors'))
-                options.setdefault('postcompilers', config.get('postcompilers'))
-                bundle_mapping[bundle_name] = options
+        for bundle_name, options in config.get('packages', {}).iteritems():
+            options['ext'] = os.path.splitext(bundle_name)[1]
+            options.setdefault('preprocessors', config.get('preprocessors'))
+            options.setdefault('postcompilers', config.get('postcompilers'))
+            bundle_mapping[bundle_name] = options
 
         for bundle_name, options in bundle_mapping.iteritems():
             src_outputs = []
-            for src in options['src']:
-                # TODO: we need to deal w/ relative files
-                # (e.g. / means absolute to static home, otherwise its relative to bunch path)
-                if src.startswith('/'):
-                    src_path = found_files[src[1:]]
+            is_mapping = isinstance(options['src'], dict)
+
+            for src_path in options['src']:
+                if is_mapping:
+                    dst_path = options['src'][src_path]
                 else:
-                    src_path = src
-                name = os.path.splitext(src)[0]
-                dst_path = name + options['ext']
+                    name = os.path.splitext(src_path)[0]
+                    dst_path = name + options['ext']
 
                 self.apply_preprocessors(
-                    options['path'],
+                    settings.STATIC_ROOT,
                     src_path,
                     dst_path,
                     options.get('preprocessors'),
@@ -151,8 +143,8 @@ class Command(BaseCommand):
                 src_outputs.append(dst_path)
 
             self.apply_postcompilers(
-                options['path'],
+                settings.STATIC_ROOT,
                 src_outputs,
-                os.path.join(options['path'], bundle_name),
+                os.path.join(settings.STATIC_ROOT, bundle_name),
                 options.get('postcompilers'),
             )
