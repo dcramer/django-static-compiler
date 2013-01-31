@@ -40,23 +40,38 @@ Configuration would be handled via a configuration file located in the applicati
 
     [site-packages]/static/packages.json
 
-The configration would describe bunches:
+An example configuration might look like this::
 
 ::
 
-    {
-        "packages": {
-            "bunchname.js": {
-                "src": ["foo.js"]
-            }
-        },
-        "preprocessors": {
-            "*.js": ["uglifyjs {input}"]
-        },
-        "postcompilers": {
-            "*.less": ["lessc {input}"]
-        }
-    }
+  {
+      "packages": {
+          "scripts/global.js": {
+              "src": [
+                  "scripts/core.js",
+                  "scripts/models.js",
+                  "scripts/templates.js",
+                  "scripts/utils.js",
+                  "scripts/collections.js",
+                  "scripts/charts.js",
+                  "scripts/views.js",
+                  "scripts/app.js"
+              ]
+          },
+          "styles/global.css": {
+              "src": [
+                  "less/sentry.less"
+              ]
+          }
+      },
+      "postcompilers": {
+          "*.js": ["node_modules/uglify-js/bin/uglifyjs {input} --source-map={name}.map{ext}"]
+      },
+      "preprocessors": {
+          "*.less": ["node_modules/less/bin/lessc {input}"]
+      }
+  }
+
 
 There are three top level attributes:
 
