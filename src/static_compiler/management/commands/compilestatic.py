@@ -45,6 +45,25 @@ class Command(BaseCommand):
         # TODO: why is uglify hanging when we pass the command as a list?
         return ' '.join(parsed_cmd)
 
+    def run_command(self, cmd, root, dst, **params):
+        parsed_cmd = self.parse_command(cmd, **params)
+
+        print " ->", parsed_cmd
+        proc = subprocess.Popen(
+            args=parsed_cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            shell=True,
+            cwd=root,
+        )
+        (stdout, stderr) = proc.communicate()
+
+        assert not proc.returncode, stderr
+
+        # TODO: this should probably change dest to be a temp file
+        with open(os.path.join(root, dst), 'w') as fp:
+            fp.write(stdout)
+
     def apply_preprocessors(self, root, src, dst, processors):
         """
         Preprocessors operate based on the source filename, and apply to each
@@ -59,22 +78,7 @@ class Command(BaseCommand):
         src_path = src
         for pattern, cmd_list in matches:
             for cmd in cmd_list:
-                parsed_cmd = self.parse_command(input=src_path, **params)
-
-                print " ->", parsed_cmd
-                proc = subprocess.Popen(
-                    args=parsed_cmd,
-                    stdout=subprocess.PIPE,
-                    shell=True,
-                    cwd=root,
-                )
-                (stdout, stderr) = proc.communicate()
-
-                assert not proc.returncode
-
-                # TODO: this should probably change dest to be a temp file
-                with open(os.path.join(root, dst), 'w') as fp:
-                    fp.write(stdout)
+                self.run_command(cmd, root=root, dst=dst, input=src_path, **params)
                 src_path = dst
 
     def apply_postcompilers(self, root, src_list, dst, processors):
@@ -100,23 +104,7 @@ class Command(BaseCommand):
         src_names = src_list
         for pattern, cmd_list in processors.iteritems():
             for cmd in cmd_list:
-                parsed_cmd = self.parse_command(input=' '.join(src_names), **params)
-
-                print " ->", parsed_cmd
-                proc = subprocess.Popen(
-                    args=parsed_cmd,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    shell=True,
-                    cwd=root,
-                )
-                (stdout, stderr) = proc.communicate()
-
-                assert not proc.returncode, stderr
-
-                # TODO: this should probably change dest to be a temp file
-                with open(dst_file, 'w') as fp:
-                    fp.write(stdout)
+                self.run_command(cmd, root=root, dst=dst, input=' '.join(src_names), **params)
                 src_names = [dst]
 
     def handle(self, *args, **options):
