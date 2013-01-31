@@ -173,3 +173,16 @@ Specify the relative path to the bunch name (relative to the static root):
 ::
 
     {% staticfile 'bunchname.js' %}
+
+
+TODO
+----
+
+Currently processors apply relative to their location, which works most of the time, but if you're combining files
+across projects the paths will be incorrect.
+
+To solve this we need to actually build a temporarily static directory (e.g. collectstatic), and then apply bundle
+commands on top of that location.
+
+This would change things so that every command executed with the cwd at the STATIC_ROOT, and src/dst files would be
+prefixed with their relative path from the root.
