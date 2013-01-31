@@ -13,6 +13,7 @@ def pytest_configure(config):
                 },
             },
             INSTALLED_APPS=[
+                'django.contrib.staticfiles',
                 'static_compiler',
             ],
             ROOT_URLCONF='',

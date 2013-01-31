@@ -45,16 +45,16 @@ The configration would describe bunches:
 ::
 
     {
-        'packages': {
-            'bunchname.js': {
-                'src': ['foo.js']
+        "packages": {
+            "bunchname.js": {
+                "src": ["foo.js"]
             }
         },
-        postcompilers: {
-            '*.js': ['uglifyjs %(input)s %(output)s']
+        "preprocessors": {
+            "*.js": ["uglifyjs %(input)s %(output)s"]
         },
-        precompilers: {
-            '*.less': ['lessc %(input)s %(output)s']
+        "postcompilers": {
+            "*.less": ["lessc %(input)s %(output)s"]
         }
     }
 
