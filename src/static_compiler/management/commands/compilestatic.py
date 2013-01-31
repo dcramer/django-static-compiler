@@ -2,6 +2,7 @@ import os.path
 import shlex
 import subprocess
 from fnmatch import fnmatch
+from optparse import make_option
 from django.conf import settings
 from django.contrib.staticfiles import finders
 from django.core.management.base import BaseCommand
@@ -17,6 +18,10 @@ def find_static_files(ignore_patterns=()):
 
 
 class Command(BaseCommand):
+    option_list = BaseCommand.option_list + (
+        make_option('--no-compile', action='store_false', default=True, dest='compile'),
+    )
+
     def get_format_params(self, dst):
         filename = os.path.basename(dst)
         path = os.path.dirname(dst)
@@ -108,43 +113,45 @@ class Command(BaseCommand):
                 self.run_command(cmd, root=root, dst=dst, input=' '.join(src_names), **params)
                 src_names = [dst]
 
-    def handle(self, *args, **options):
+    def handle(self, *bundles, **options):
         config = settings.STATIC_BUNDLES
         if not config:
             return
 
         # First we need to build a mapping of all files using django.contrib.staticfiles
         bundle_mapping = {}
+        for bundle_name, bundle_opts in config.get('packages', {}).iteritems():
+            if bundles and bundle_name not in bundles:
+                continue
 
-        for bundle_name, options in config.get('packages', {}).iteritems():
-            options['ext'] = os.path.splitext(bundle_name)[1]
-            options.setdefault('preprocessors', config.get('preprocessors'))
-            options.setdefault('postcompilers', config.get('postcompilers'))
-            bundle_mapping[bundle_name] = options
+            bundle_opts['ext'] = os.path.splitext(bundle_name)[1]
+            bundle_opts.setdefault('preprocessors', config.get('preprocessors'))
+            bundle_opts.setdefault('postcompilers', config.get('postcompilers'))
+            bundle_mapping[bundle_name] = bundle_opts
 
-        for bundle_name, options in bundle_mapping.iteritems():
+        for bundle_name, bundle_opts in bundle_mapping.iteritems():
             src_outputs = []
-            is_mapping = isinstance(options['src'], dict)
+            is_mapping = isinstance(bundle_opts['src'], dict)
 
-            for src_path in options['src']:
+            for src_path in bundle_opts['src']:
                 if is_mapping:
-                    dst_path = options['src'][src_path]
+                    dst_path = bundle_opts['src'][src_path]
                 else:
-                    name = os.path.splitext(src_path)[0]
-                    dst_path = name + options['ext']
+                    dst_path = src_path
 
                 self.apply_preprocessors(
                     settings.STATIC_ROOT,
                     src_path,
                     dst_path,
-                    options.get('preprocessors'),
+                    bundle_opts.get('preprocessors'),
                 )
 
                 src_outputs.append(dst_path)
 
-            self.apply_postcompilers(
-                settings.STATIC_ROOT,
-                src_outputs,
-                os.path.join(settings.STATIC_ROOT, bundle_name),
-                options.get('postcompilers'),
-            )
+            if options['compile']:
+                self.apply_postcompilers(
+                    settings.STATIC_ROOT,
+                    src_outputs,
+                    os.path.join(settings.STATIC_ROOT, bundle_name),
+                    bundle_opts.get('postcompilers'),
+                )
