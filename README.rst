@@ -51,41 +51,42 @@ The configration would describe bunches:
             }
         },
         "preprocessors": {
-            "*.js": ["uglifyjs %(input)s %(output)s"]
+            "*.js": ["uglifyjs {input}"]
         },
         "postcompilers": {
-            "*.less": ["lessc %(input)s %(output)s"]
+            "*.less": ["lessc {input}"]
         }
     }
 
 There are three top level attributes:
 
 packages
-  a mapping of bunches to their options (options can include top level options as well)
+  A mapping of bunches to their options (options can include top level options as well)
 precompilers
-  a mapping of input grep patterns to a list of (ordered) commands to execute on files
+  A mapping of input grep patterns to a list of (ordered) commands to execute on files
   in all situations (including DEBUG use).
 postcompilers
-  a mapping of input grep patterns to a list of (ordered) commands to execute on files
+  A mapping of input grep patterns to a list of (ordered) commands to execute on files
   which are designated for distribution (e.g. not DEBUG use).
 
 The packages attribute accepts the following:
 
 src
-  a list of source files to include in this bunch
+  A list or mapping of source files to include in this bunch. If the value is a mapping
+  the key is the input file, and the value is the output file.
 
 We'd make several variables available to post- and precompilers:
 
 input
   absolute path to input file
-output
-  absolute path to output file
 ext
   output extension (e.g. .js)
 name
   extensionless filename from output (e.g. bunchname)
 filename
   full output filename (e.g. bunchname.js)
+path
+  full output dir path (e.g. foo/bar)
 
 File Locations
 ~~~~~~~~~~~~~~
