@@ -112,24 +112,30 @@ both).
 
 Once we've dealt w/ compilation, the staticfiles finder would work as expected.
 
-PreProcessors
-~~~~~~~~~~~~~
+Pre-Processors
+~~~~~~~~~~~~~~
 
 A pre-processor will **always** be run. This is nearly always a requirement as things like LESS files have to be processed
 befor they can be served in a browser.
 
-When preprocessing happens each input file is transformed to an output file (using the standard versioning scheme). For
+When pre-processing happens each input file is transformed to an output file (using the standard versioning scheme). For
 example, if I had a bunch that included foo.less and bar.less, each would be compiled separately, and I'd end up with
 two output files: foo.css, and bar.css.
 
-PostProcessors
+The first pre-processor will change the input filename to be the expected output filename, and the following processors
+will be passed that to work with.
+
+Post-Compilers
 ~~~~~~~~~~~~~~
 
-A post-process runs on pre-processed inputs and is expected to concatenate the results together into a unified file.
+A post-compiler runs on pre-processed inputs and is expected to concatenate the results together into a unified file.
 
 For example, if it runs against foo.js and bar.js, it will output bundle.js.
 
-If no post-processors happen, the result would be similar to the following: cat [input, input, input] > output
+Each post-compiler must be able to accept 1+ inputs, and he first post-compilers will be responsible for combining files
+and the resulting file will be passed to the additional compilers.
+
+If no post-compilers happen, the result would be similar to the following: cat [input, input, input] > output
 
 
 Template Usage
