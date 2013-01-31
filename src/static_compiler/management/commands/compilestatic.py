@@ -46,6 +46,9 @@ class Command(BaseCommand):
         return ' '.join(parsed_cmd)
 
     def run_command(self, cmd, root, dst, **params):
+        """
+        Execute a command, and if successful write it's stdout to ``root``/``dst``.
+        """
         parsed_cmd = self.parse_command(cmd, **params)
 
         print " ->", parsed_cmd
