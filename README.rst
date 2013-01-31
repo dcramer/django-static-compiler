@@ -34,38 +34,38 @@ Eventually these would be collected (using standard staticfiles) in your project
 Application Configuration
 -------------------------
 
-Configuration is handled via the STATIC_BUNDLES setting, in settings.py.
+Configuration is handled via the ``STATIC_BUNDLES`` setting, in ``settings.py``.
 
 An example configuration might look like this:
 
 ::
 
-    {
+    STATIC_BUNDLES = {
         "packages": {
-            "scripts/global.js": {
+            "sentry/scripts/global.js": {
                 "src": [
-                    "scripts/core.js",
-                    "scripts/models.js",
-                    "scripts/templates.js",
-                    "scripts/utils.js",
-                    "scripts/collections.js",
-                    "scripts/charts.js",
-                    "scripts/views.js",
-                    "scripts/app.js"
-                ]
+                    "sentry/scripts/core.js",
+                    "sentry/scripts/models.js",
+                    "sentry/scripts/templates.js",
+                    "sentry/scripts/utils.js",
+                    "sentry/scripts/collections.js",
+                    "sentry/scripts/charts.js",
+                    "sentry/scripts/views.js",
+                    "sentry/scripts/app.js",
+                ],
             },
-            "styles/global.css": {
-                "src": [
-                    "less/sentry.less"
-                ]
-            }
+            "sentry/styles/global.css": {
+                "src": {
+                    "sentry/less/sentry.less": "sentry/styles/sentry.css",
+                },
+            },
         },
         "postcompilers": {
-            "*.js": ["node_modules/uglify-js/bin/uglifyjs {input} --source-map={name}.map{ext}"]
+            "*.js": ["node_modules/uglify-js/bin/uglifyjs {input} --source-map-url={name}.map{ext} --source-map={relpath}/{name}.map{ext}"],
         },
         "preprocessors": {
-            "*.less": ["node_modules/less/bin/lessc {input}"]
-        }
+            "*.less": ["node_modules/less/bin/lessc {input}"],
+        },
     }
 
 
