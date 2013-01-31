@@ -126,9 +126,7 @@ class Command(BaseCommand):
                 options.setdefault('postcompilers', config.get('postcompilers'))
                 bundle_mapping[bundle_name] = options
 
-        # Now do shit
         for bundle_name, options in bundle_mapping.iteritems():
-            # output = StringIO()
             src_outputs = []
             for src in options['src']:
                 # TODO: we need to deal w/ relative files
