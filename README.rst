@@ -42,7 +42,7 @@ An example configuration might look like this:
 
     STATIC_BUNDLES = {
         "packages": {
-            "sentry/scripts/global.js": {
+            "sentry/scripts/global.min.js": {
                 "src": [
                     "sentry/scripts/core.js",
                     "sentry/scripts/models.js",
@@ -54,7 +54,7 @@ An example configuration might look like this:
                     "sentry/scripts/app.js",
                 ],
             },
-            "sentry/styles/global.css": {
+            "sentry/styles/global.min.css": {
                 "src": {
                     "sentry/less/sentry.less": "sentry/styles/sentry.css",
                 },
@@ -152,6 +152,16 @@ Otherwise:
 
 In general it simply acts as a proxy to the Django {% static %} templatetag with the inclusion of script/link/etc
 HTML tags.
+
+Distributing Staticfiles with your App
+--------------------------------------
+
+The flow would be just like in your project. You'd start by defining STATIC_BUNDLES (in a build_settings.py, or
+something along the lines), and then you'd simply do the following (pre-commit?):
+
+::
+
+  django-admin.py --settings=build_settings.py compilestatic
 
 TODO
 ----
