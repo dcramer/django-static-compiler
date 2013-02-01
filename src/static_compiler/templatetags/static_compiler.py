@@ -22,9 +22,11 @@ def staticbundle(bundle, mimetype=None, **attrs):
     >>> {% staticbundle 'bundlename.css' media='screen' %}
     >>> {% staticbundle 'bundlename' mimetype='text/css' %}
     """
-    if settings.DEBUG and bundle in settings.STATIC_BUNDLES['packages']:
+    config = getattr(settings, 'STATIC_BUNDLES', {})
+
+    if settings.DEBUG and bundle in config['packages']:
         outdated = False
-        src_list = settings.STATIC_BUNDLES['packages'][bundle]['src']
+        src_list = config['packages'][bundle]['src']
         for src in src_list:
             cached_mtime = BUNDLE_CACHE.get(src, 0)
             current_mtime = os.stat(staticfiles_storage.path(src)).st_mtime
