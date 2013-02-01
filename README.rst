@@ -61,10 +61,10 @@ An example configuration might look like this:
             },
         },
         "postcompilers": {
-            "*.js": ["node_modules/uglify-js/bin/uglifyjs {input} --source-map-url={name}.map{ext} --source-map={relpath}/{name}.map{ext}"],
+            "*.js": ["node_modules/uglify-js/bin/uglifyjs {input} --source-map-root={relroot}/ --source-map-url={name}.map{ext} --source-map={relpath}/{name}.map{ext} -o {output}"],
         },
         "preprocessors": {
-            "*.less": ["node_modules/less/bin/lessc {input}"],
+            "*.less": ["node_modules/less/bin/lessc {input} {output}"],
         },
     }
 
