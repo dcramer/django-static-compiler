@@ -3,15 +3,25 @@ from django import template
 from django.conf import settings
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.management import call_command
+from django.utils.html import escape
 
 register = template.Library()
 
 
 BUNDLE_CACHE = {}
+TEMPLATES = {
+    'text/css': '<link href="%(url)s" rel="stylesheet" type="%(mimetype)s %(attrs)s/>',
+    'text/javascript': '<script src="%(url)s" type="%(mimetype)s" %(attrs)s></script>',
+}
 
 
 @register.simple_tag
-def staticbundle(bundle):
+def staticbundle(bundle, mimetype=None, **attrs):
+    """
+    >>> {% staticbundle 'bundlename.css' %}
+    >>> {% staticbundle 'bundlename.css' media='screen' %}
+    >>> {% staticbundle 'bundlename' mimetype='text/css' %}
+    """
     if settings.DEBUG and bundle in settings.STATIC_BUNDLES['packages']:
         outdated = False
         src_list = settings.STATIC_BUNDLES['packages'][bundle]['src']
@@ -35,10 +45,15 @@ def staticbundle(bundle):
     for src in src_list:
         url = staticfiles_storage.url(src)
 
-        # TODO: make this less stupid and configurable
         if url.endswith('.css'):
-            output.append('<link href="%s" rel="stylesheet" type="text/css"/>' % (url,))
+            mimetype = 'text/css'
         elif url.endswith('.js'):
-            output.append('<script type="text/javascript" src="%s"></script>' % (url,))
+            mimetype = 'text/javascript'
+
+        output.append(TEMPLATES[mimetype] % dict(
+            url=url,
+            mimetype=mimetype,
+            attrs=' '.join('%s="%s"' % (k, escape(v)) for k, v in attrs.iteritems()),
+        ))
 
     return '\n'.join(output)
