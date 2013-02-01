@@ -151,6 +151,8 @@ Specify the relative path to the bunch name (relative to the static root):
 
 ::
 
+    {% load static_compiler %}
+
     {% staticbundle 'bundle.js' %}
 
 You can also specify attributes, such as mimetype:
