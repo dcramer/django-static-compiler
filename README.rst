@@ -171,8 +171,8 @@ Otherwise:
 In general it simply acts as a proxy to the Django {% static %} templatetag with the inclusion of script/link/etc
 HTML tags.
 
-Distributing Staticfiles with your App
---------------------------------------
+Distributing Staticfiles with your Library
+------------------------------------------
 
 The flow would be just like in your project. You'd start by defining STATIC_BUNDLES (in a build_settings.py, or
 something along the lines), and then you'd simply do the following (pre-commit?):
