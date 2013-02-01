@@ -37,6 +37,8 @@ class Command(BaseCommand):
             filename=filename,
             relpath=relpath,
             abspath=path,
+            # TODO: is there a better way to do the relroot?
+            relroot=os.sep.join([os.pardir] * (relpath.count(os.sep) + 1),),
             static_root=os.path.abspath(settings.STATIC_ROOT),
         )
 
@@ -52,6 +54,9 @@ class Command(BaseCommand):
         """
         Execute a command, and if successful write it's stdout to ``root``/``dst``.
         """
+        use_stdout = '{output}' not in cmd
+        if not use_stdout:
+            params['output'] = dst
         parsed_cmd = self.parse_command(cmd, **params)
 
         print " ->", parsed_cmd
@@ -66,9 +71,10 @@ class Command(BaseCommand):
 
         assert not proc.returncode, stderr
 
-        # TODO: this should probably change dest to be a temp file
-        with open(os.path.join(root, dst), 'w') as fp:
-            fp.write(stdout)
+        if use_stdout:
+            # TODO: this should probably change dest to be a temp file
+            with open(os.path.join(root, dst), 'w') as fp:
+                fp.write(stdout)
 
     def apply_preprocessors(self, root, src, dst, processors):
         """
@@ -152,6 +158,6 @@ class Command(BaseCommand):
                 self.apply_postcompilers(
                     settings.STATIC_ROOT,
                     src_outputs,
-                    os.path.join(settings.STATIC_ROOT, bundle_name),
+                    bundle_name,
                     bundle_opts.get('postcompilers'),
                 )

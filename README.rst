@@ -90,6 +90,8 @@ We'd make several variables available to post- and precompilers:
 
 input
   absolute path to input file
+output
+  absolute path to output file -- if not present will fetch from stdout
 ext
   output extension (e.g. .js)
 name
