@@ -100,6 +100,10 @@ filename
   full output filename (e.g. bundle.js)
 path
   full output dir path (e.g. foo/bar)
+relroot
+  the relative path to the STATIC_ROOT. e.g. ../../..
+root
+  the value of STATIC_ROOT
 
 
 Staticfiles Collection and Compiliation

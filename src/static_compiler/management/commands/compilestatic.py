@@ -39,7 +39,7 @@ class Command(BaseCommand):
             abspath=path,
             # TODO: is there a better way to do the relroot?
             relroot=os.sep.join([os.pardir] * (relpath.count(os.sep) + 1),),
-            static_root=os.path.abspath(settings.STATIC_ROOT),
+            root=os.path.abspath(settings.STATIC_ROOT),
         )
 
     def parse_command(self, cmd, **params):
