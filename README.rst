@@ -153,6 +153,12 @@ Specify the relative path to the bunch name (relative to the static root):
 
     {% staticbundle 'bundle.js' %}
 
+You can also specify attributes, such as mimetype:
+
+::
+
+    {% staticbundle 'bundle.foo' mimetype='text/css' media='screen' %}
+
 If we're in DEBUG / development mode and 'bundle.js' is defined in STATIC_BUNDLES:
 
 1. Determines if it needs to recompile any files (based on its last modified time)
