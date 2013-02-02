@@ -22,6 +22,12 @@ class Command(BaseCommand):
         make_option('--no-compile', action='store_false', default=True, dest='compile'),
     )
 
+    @property
+    def static_files(self):
+        if not hasattr(self, '_static_file_cache'):
+            self._static_file_cache = find_static_files()
+        return self._static_file_cache
+
     def get_format_params(self, dst):
         filename = os.path.basename(dst)
         path = os.path.dirname(dst)
@@ -134,6 +140,9 @@ class Command(BaseCommand):
             bundle_opts.setdefault('preprocessors', config.get('preprocessors'))
             bundle_opts.setdefault('postcompilers', config.get('postcompilers'))
             bundle_mapping[bundle_name] = bundle_opts
+
+            # convert sources to absolute filepaths
+            bundle_opts['src'] = [self.static_files[s] for s in bundle_opts['src']]
 
         for bundle_name, bundle_opts in bundle_mapping.iteritems():
             src_outputs = []
