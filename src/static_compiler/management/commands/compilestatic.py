@@ -42,22 +42,22 @@ class Command(BaseCommand):
             root=os.path.abspath(settings.STATIC_ROOT),
         )
 
-    def parse_command(self, cmd, **params):
-        parsed_cmd = shlex.split(str(cmd).format(**params))
+    def parse_command(self, cmd, input, params):
+        parsed_cmd = shlex.split(str(cmd).format(input=input, **params))
         # force absolute path to binary
         parsed_cmd[0] = os.path.abspath(parsed_cmd[0])
 
         # TODO: why is uglify hanging when we pass the command as a list?
         return ' '.join(parsed_cmd)
 
-    def run_command(self, cmd, root, dst, **params):
+    def run_command(self, cmd, root, dst, input, params):
         """
         Execute a command, and if successful write it's stdout to ``root``/``dst``.
         """
         use_stdout = '{output}' not in cmd
         if not use_stdout:
             params['output'] = dst
-        parsed_cmd = self.parse_command(cmd, **params)
+        parsed_cmd = self.parse_command(cmd, input=input, params=params)
 
         print " ->", parsed_cmd
         proc = subprocess.Popen(
@@ -90,7 +90,7 @@ class Command(BaseCommand):
         src_path = src
         for pattern, cmd_list in matches:
             for cmd in cmd_list:
-                self.run_command(cmd, root=root, dst=dst, input=src_path, **params)
+                self.run_command(cmd, root=root, dst=dst, input=src_path, params=params)
                 src_path = dst
 
     def apply_postcompilers(self, root, src_list, dst, processors):
@@ -116,7 +116,7 @@ class Command(BaseCommand):
         src_names = src_list
         for pattern, cmd_list in processors.iteritems():
             for cmd in cmd_list:
-                self.run_command(cmd, root=root, dst=dst, input=' '.join(src_names), **params)
+                self.run_command(cmd, root=root, dst=dst, input=' '.join(src_names), params=params)
                 src_names = [dst]
 
     def handle(self, *bundles, **options):
