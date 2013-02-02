@@ -109,14 +109,10 @@ root
 Staticfiles Collection and Compiliation
 ---------------------------------------
 
-First, the compilation phase happens. This would happen either within the 3rd party app or the project (or potentially
-both).
+The process currently looks like this:
 
-- Run manage.py compilestatic
-- It iterates your staticfiles finders, finds configurations, and compiles the static files into the relative
-  locations.
-
-Once we've dealt w/ compilation, the staticfiles finder would work as expected.
+- django-admin.py collectstatic
+- django-admin.py compilestatic
 
 Pre-Processors
 ~~~~~~~~~~~~~~
