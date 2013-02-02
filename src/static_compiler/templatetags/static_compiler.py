@@ -35,7 +35,7 @@ def staticbundle(bundle, mimetype=None, **attrs):
                 BUNDLE_CACHE[src] = current_mtime
 
         if outdated:
-            call_command('compilestatic', bundle, compile=False)
+            call_command('compilestatic', bundle)
 
         if isinstance(src_list, dict):
             src_list = src_list.values()
