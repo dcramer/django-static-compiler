@@ -120,6 +120,8 @@ def apply_preprocessors(root, src, dst, processors):
             run_command(cmd, root=root, dst=dst, input=src_path, params=params)
             src_path = dst
 
+    return True
+
 
 def apply_postcompilers(root, src_list, dst, processors):
     """
@@ -137,7 +139,7 @@ def apply_postcompilers(root, src_list, dst, processors):
                 with open(os.path.join(root, src)) as src_fp:
                     for chunk in src_fp:
                         dst_fp.write(chunk)
-        return
+        return True
 
     params = get_format_params(dst)
 
@@ -147,6 +149,8 @@ def apply_postcompilers(root, src_list, dst, processors):
         for cmd in cmd_list:
             run_command(cmd, root=root, dst=dst, input=' '.join(src_names), params=params)
             src_names = [dst]
+
+    return True
 
 
 class Command(BaseCommand):
@@ -200,7 +204,6 @@ class Command(BaseCommand):
                     dst=dst_abspath,
                     processors=bundle_opts.get('preprocessors'),
                 )
-
                 if was_run:
                     copy_file(
                         src=dst_abspath,
