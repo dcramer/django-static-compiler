@@ -41,6 +41,7 @@ An example configuration might look like this:
 ::
 
     STATIC_BUNDLES = {
+        "cache": "CACHE",
         "packages": {
             "sentry/scripts/global.min.js": {
                 "src": [
@@ -69,8 +70,11 @@ An example configuration might look like this:
     }
 
 
-There are three top level attributes:
+There are the following top level attributes:
 
+cache
+  The directory name to store the compiler's cached files in. This is relative to ``STATIC_ROOT``, and is only used
+  for compiling files.
 packages
   A mapping of bunches to their options (options can include top level options as well)
 precompilers
@@ -179,15 +183,3 @@ something along the lines), and then you'd simply do the following (pre-commit?)
 
   django-admin.py --settings=build_settings.py compilestatic
 
-
-TODO
-----
-
-Sourcemaps currently cannot function in things like uglify-js because we have to use absolute paths to all input files
-(vs a relative path which is how it'd be when collectstatic is run). Ideally we'd be able to say "heres our input file"
-and "here is the relative output location".
-
-The only solution to this currently would be to collect files into a temporary static root. We could have a cache directory
-where all files are expected to exist, and when they're not present they're automatically moved over. We could then check
-the original location for changes (whenever the staticbundle tag happens) and if a file has changed that's referenced it
-gets copied over, and we run compilers again.
