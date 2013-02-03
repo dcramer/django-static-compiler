@@ -14,12 +14,14 @@ from django.utils.datastructures import SortedDict
 from static_compiler.constants import DEFAULT_CACHE_DIR
 
 
-def copy_file(src, dst):
+def ensure_dirs(dst):
     dirname = os.path.dirname(dst)
     if not os.path.exists(dirname):
         os.makedirs(dirname)
 
-    # preserve modification times/etc using copy2
+
+def copy_file(src, dst):
+    ensure_dirs(dst)
     shutil.copy2(src, dst)
 
 
@@ -81,6 +83,8 @@ def run_command(cmd, root, dst, input, params):
         params['output'] = dst
     parsed_cmd = parse_command(cmd, input=input, params=params)
 
+    ensure_dirs(dst)
+
     print " ->", parsed_cmd
     proc = subprocess.Popen(
         args=parsed_cmd,
@@ -126,6 +130,7 @@ def apply_postcompilers(root, src_list, dst, processors):
 
     matches = [(pattern, cmds) for pattern, cmds in processors.iteritems() if fnmatch(dst, pattern)]
     if not matches:
+        ensure_dirs(dst_file)
         # We should just concatenate the files
         with open(dst_file, 'w') as dst_fp:
             for src in src_list:
@@ -149,12 +154,6 @@ class Command(BaseCommand):
         make_option('--no-compile', action='store_false', default=True, dest='compile'),
     )
 
-    @property
-    def static_files(self):
-        if not hasattr(self, '_static_file_cache'):
-            self._static_file_cache = find_static_files()
-        return self._static_file_cache
-
     def handle(self, *bundles, **options):
         config = settings.STATIC_BUNDLES
         if not config:
@@ -163,8 +162,7 @@ class Command(BaseCommand):
         cache_root = os.path.join(settings.STATIC_ROOT,
             config.get('cache') or DEFAULT_CACHE_DIR)
 
-        # A set of all (relative) static files we've referenced
-        used_static_files = set()
+        static_files = find_static_files()
 
         # First we need to build a mapping of all files using django.contrib.staticfiles
         bundle_mapping = {}
@@ -177,11 +175,7 @@ class Command(BaseCommand):
             bundle_opts.setdefault('postcompilers', config.get('postcompilers'))
             bundle_mapping[bundle_name] = bundle_opts
 
-            for s in bundle_opts['src']:
-                used_static_files.add(s)
-
-        collect_static_files(dict((s, self.static_files[s]) for s in used_static_files),
-            cache_root)
+        collect_static_files(static_files, cache_root)
 
         for bundle_name, bundle_opts in bundle_mapping.iteritems():
             src_outputs = []
