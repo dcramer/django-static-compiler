@@ -1,3 +1,6 @@
+from __future__ import absolute_import
+
+import logging
 import os
 from django import template
 from django.conf import settings
@@ -5,8 +8,11 @@ from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.management import call_command
 from django.utils.html import escape
 
-register = template.Library()
+from static_compiler.constants import DEFAULT_CACHE_DIR
 
+
+register = template.Library()
+logger = logging.getLogger('static_compiler')
 
 BUNDLE_CACHE = {}
 TEMPLATES = {
@@ -25,16 +31,23 @@ def staticbundle(bundle, mimetype=None, **attrs):
     config = getattr(settings, 'STATIC_BUNDLES', {})
 
     if settings.DEBUG and bundle in config['packages']:
-        outdated = False
+        cache_root = os.path.join(settings.STATIC_ROOT, config.get('cache') or DEFAULT_CACHE_DIR)
+
+        changed = set()
         src_list = config['packages'][bundle]['src']
         for src in src_list:
-            cached_mtime = BUNDLE_CACHE.get(src, 0)
+            cached_mtime = BUNDLE_CACHE.get(src)
+            if cached_mtime is None:
+                BUNDLE_CACHE[src] = cached_mtime = os.stat(
+                    os.path.join(cache_root, src)).st_mtime
+
             current_mtime = os.stat(staticfiles_storage.path(src)).st_mtime
-            if current_mtime > cached_mtime:
-                outdated = True
+            if current_mtime != cached_mtime:
+                changed.add(src)
                 BUNDLE_CACHE[src] = current_mtime
 
-        if outdated:
+        if changed:
+            logger.info('Regenerating %s due to changes: %s', bundle, ' '.join(changed))
             call_command('compilestatic', bundle)
 
         if isinstance(src_list, dict):
