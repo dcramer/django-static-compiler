@@ -48,7 +48,9 @@ def staticbundle(bundle, mimetype=None, **attrs):
         for src in src_list:
             if is_mapping:
                 src_out = get_file_path(src)
-                if not (src_out and os.path.exists(os.path.join(settings.STATIC_ROOT, src_list[src]))):
+                if not src_out:
+                    changed.add(src)
+                elif not os.path.exists(os.path.join(cache_root, src_list[src])):
                     changed.add(src)
 
             cached_mtime = BUNDLE_CACHE.get(src)
@@ -57,7 +59,7 @@ def staticbundle(bundle, mimetype=None, **attrs):
                     BUNDLE_CACHE[src] = cached_mtime = os.stat(
                         os.path.join(cache_root, src)).st_mtime
                 except OSError:
-                    cached_mtime = -1
+                    cached_mtime = 0
 
             abs_src = get_file_path(src)
 

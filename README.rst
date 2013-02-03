@@ -34,6 +34,21 @@ Eventually these would be collected (using standard staticfiles) in your project
 Application Configuration
 -------------------------
 
+You'll need to add the library to both your ``INSTALLED_APPS`` and ``STATICFILES_FINDERS``:
+
+::
+
+  STATICFILES_FINDERS = (
+      "django.contrib.staticfiles.finders.FileSystemFinder",
+      "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+      "static_compiler.finders.StaticCompilerFinder",
+  )
+
+  INSTALLED_APPS = (
+      # ...
+      "static_compiler",
+  )
+
 Configuration is handled via the ``STATIC_BUNDLES`` setting, in ``settings.py``.
 
 An example configuration might look like this:
