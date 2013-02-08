@@ -168,6 +168,11 @@ class Command(BaseCommand):
 
         static_files = find_static_files()
 
+        # remove all files in cache root
+        for key, value in static_files.items():
+            if value.startswith(cache_root):
+                del static_files[key]
+
         # First we need to build a mapping of all files using django.contrib.staticfiles
         bundle_mapping = {}
         for bundle_name, bundle_opts in config.get('packages', {}).iteritems():
