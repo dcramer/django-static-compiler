@@ -38,7 +38,7 @@ def staticbundle(bundle, mimetype=None, **attrs):
     """
     config = getattr(settings, 'STATIC_BUNDLES', {})
 
-    if settings.DEBUG and bundle in config['packages']:
+    if settings.DEBUG and 'packages' in config and bundle in config['packages']:
         cache_root = os.path.join(settings.STATIC_ROOT, config.get('cache') or DEFAULT_CACHE_DIR)
 
         changed = set()
