@@ -25,7 +25,7 @@ install_requires = [
 
 setup(
     name='django-static-compiler',
-    version='0.3.1',
+    version='0.3.2',
     author='David Cramer',
     author_email='dcramer@gmail.com',
     url='http://github.com/dcramer/django-static-compiler',
