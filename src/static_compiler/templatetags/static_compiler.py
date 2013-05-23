@@ -2,6 +2,8 @@ from __future__ import absolute_import
 
 import logging
 import os
+import urlparse
+
 from django import template
 from django.conf import settings
 from django.contrib.staticfiles import finders
@@ -87,9 +89,11 @@ def staticbundle(bundle, mimetype=None, **attrs):
     for src in src_list:
         url = staticfiles_storage.url(src)
 
-        if url.endswith('.css'):
+        # Some storages backends will yield urls with querystring attached
+        path = urlparse.urlparse(url).path
+        if path.endswith('.css'):
             mimetype = 'text/css'
-        elif url.endswith('.js'):
+        elif path.endswith('.js'):
             mimetype = 'text/javascript'
 
         output.append(TEMPLATES[mimetype] % dict(

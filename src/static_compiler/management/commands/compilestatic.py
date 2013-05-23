@@ -145,7 +145,7 @@ def apply_postcompilers(root, src_list, dst, processors):
 
     # TODO: probably doesnt play nice everywhere
     src_names = src_list
-    for pattern, cmd_list in processors.iteritems():
+    for pattern, cmd_list in matches:
         for cmd in cmd_list:
             run_command(cmd, root=root, dst=dst, input=' '.join(src_names), params=params)
             src_names = [dst]
