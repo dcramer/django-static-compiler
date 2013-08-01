@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from django.contrib.staticfiles import finders
+from django.contrib.staticfiles import finders, utils
 from static_compiler.storage import StaticCompilerFileStorage
 
 
@@ -12,4 +12,5 @@ class StaticCompilerFinder(finders.BaseStorageFinder):
     storage = StaticCompilerFileStorage
 
     def list(self, ignore_patterns):
-        return []
+        for path in utils.get_files(self.storage, ignore_patterns):
+            yield path, self.storage

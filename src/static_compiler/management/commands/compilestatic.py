@@ -213,7 +213,7 @@ class Command(BaseCommand):
                 if was_run:
                     copy_file(
                         src=dst_abspath,
-                        dst=os.path.join(settings.STATIC_ROOT, dst_path)
+                        dst=os.path.join(cache_root, dst_path)
                     )
 
                 src_outputs.append(dst_path)
@@ -225,6 +225,6 @@ class Command(BaseCommand):
                 apply_postcompilers(
                     root=cache_root,
                     src_list=src_outputs,
-                    dst=os.path.join(settings.STATIC_ROOT, bundle_name),
+                    dst=os.path.join(cache_root, bundle_name),
                     processors=bundle_opts.get('postcompilers'),
                 )
