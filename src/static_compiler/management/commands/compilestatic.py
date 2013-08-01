@@ -59,6 +59,7 @@ def get_format_params(dst):
         filename=filename,
         relpath=relpath,
         abspath=path,
+        urlroot=settings.STATIC_URL,
         # TODO: is there a better way to do the relroot?
         relroot=os.sep.join([os.pardir] * (relpath.count(os.sep) + 1),),
         root=os.path.abspath(settings.STATIC_ROOT),
