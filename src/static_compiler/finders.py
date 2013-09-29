@@ -11,17 +11,11 @@ class StaticCompilerFinder(finders.BaseStorageFinder):
     A staticfiles finder that looks in the compiler's cache directory
     for intermediate files.
     """
-    storage = StaticCompilerFileStorage
-
     def list(self, ignore_patterns):
         return []
 
 
-class StaticCompilerWithCacheFinder(finders.BaseStorageFinder):
-    """
-    A staticfiles finder that looks in the compiler's cache directory
-    for intermediate files.
-    """
+class StaticCompilerWithCacheFinder(StaticCompilerFinder):
     storage = StaticCompilerFileStorage
 
     def list(self, ignore_patterns):

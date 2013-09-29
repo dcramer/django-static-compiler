@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+import logging
 import os.path
 import shlex
 import shutil
@@ -13,6 +14,8 @@ from django.utils.datastructures import SortedDict
 
 from static_compiler.constants import DEFAULT_CACHE_DIR
 
+logger = logging.getLogger('static_compiler')
+
 
 def ensure_dirs(dst):
     dirname = os.path.dirname(dst)
@@ -21,15 +24,21 @@ def ensure_dirs(dst):
 
 
 def copy_file(src, dst):
+    logger.debug("Copying [%s] to [%s]", src, dst)
     ensure_dirs(dst)
     shutil.copy2(src, dst)
 
 
-def find_static_files(ignore_patterns=()):
+def find_static_files(cache_root, ignore_patterns=()):
     found_files = SortedDict()
     for finder in finders.get_finders():
         for path, storage in finder.list(ignore_patterns):
-            found_files[path] = storage.path(path)
+            abspath = storage.path(path)
+            # ensure we dont include any files which are part of the cache
+            # root as it will invalidate the real files
+            if abspath.startswith(cache_root):
+                continue
+            found_files[path] = abspath
     return found_files
 
 
@@ -86,7 +95,8 @@ def run_command(cmd, root, dst, input, params):
 
     ensure_dirs(dst)
 
-    print " ->", parsed_cmd
+    logger.debug("Running [%s] from [%s]", parsed_cmd, root)
+
     proc = subprocess.Popen(
         args=parsed_cmd,
         stdout=subprocess.PIPE,
@@ -164,15 +174,10 @@ class Command(BaseCommand):
         if not config:
             return
 
-        cache_root = os.path.join(settings.STATIC_ROOT,
-            config.get('cache') or DEFAULT_CACHE_DIR)
+        cache_root = os.path.join(
+            settings.STATIC_ROOT, config.get('cache') or DEFAULT_CACHE_DIR)
 
-        static_files = find_static_files()
-
-        # remove all files in cache root
-        for key, value in static_files.items():
-            if value.startswith(cache_root):
-                del static_files[key]
+        static_files = find_static_files(cache_root)
 
         # First we need to build a mapping of all files using django.contrib.staticfiles
         bundle_mapping = {}
@@ -185,15 +190,18 @@ class Command(BaseCommand):
             bundle_opts.setdefault('postcompilers', config.get('postcompilers'))
             bundle_mapping[bundle_name] = bundle_opts
 
+        logger.info('Collecting static files into [%s]', cache_root)
         collect_static_files(static_files, cache_root)
 
         for bundle_name, bundle_opts in bundle_mapping.iteritems():
             src_outputs = []
             is_mapping = isinstance(bundle_opts['src'], dict)
 
+            logger.info('Processing bundle [%s]', bundle_name)
+
             for src_path in bundle_opts['src']:
-                # TODO: we should guarantee that you cant preprocess an input into the
-                # same output file
+                # TODO: we should guarantee that you cant preprocess an input
+                # into the same output file
                 if not bundle_opts.get('preprocessors'):
                     continue
 

@@ -72,8 +72,8 @@ def staticbundle(bundle, mimetype=None, **attrs):
                     changed.add(src)
                     BUNDLE_CACHE[src] = current_mtime
             elif settings.TEMPLATE_DEBUG:
-                raise template.TemplateSyntaxError("The source file '%s' could "
-                    "not be located." % src)
+                raise template.TemplateSyntaxError(
+                    "The source file '%s' could not be located." % src)
 
         if changed:
             logger.info('Regenerating %s due to changes: %s', bundle, ' '.join(changed))
