@@ -15,8 +15,8 @@ class StaticCompilerFileStorage(FileSystemStorage):
             location = os.path.join(settings.STATIC_ROOT, DEFAULT_CACHE_DIR)
         if base_url is None:
             base_url = settings.STATIC_URL
-        super(StaticCompilerFileStorage, self).__init__(location, base_url,
-                                                    *args, **kwargs)
+        super(StaticCompilerFileStorage, self).__init__(
+            location, base_url, *args, **kwargs)
 
     def accessed_time(self, name):
         return datetime.fromtimestamp(os.path.getatime(self.path(name)))

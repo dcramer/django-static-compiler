@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import logging
+import os
 import os.path
 import shlex
 import shutil
@@ -77,11 +78,13 @@ def get_format_params(dst):
 
 def parse_command(cmd, input, params):
     parsed_cmd = shlex.split(str(cmd).format(input=input, **params))
-    # force absolute path to binary
-    parsed_cmd[0] = os.path.abspath(parsed_cmd[0])
+
+    if os.path.exists(parsed_cmd[0]):
+        parsed_cmd[0] = os.path.realpath(parsed_cmd[0])
 
     # TODO: why is uglify hanging when we pass the command as a list?
-    return ' '.join(parsed_cmd)
+    parsed_cmd = ' '.join(parsed_cmd)
+    return parsed_cmd
 
 
 def run_command(cmd, root, dst, input, params):
@@ -93,9 +96,9 @@ def run_command(cmd, root, dst, input, params):
         params['output'] = dst
     parsed_cmd = parse_command(cmd, input=input, params=params)
 
-    ensure_dirs(dst)
+    ensure_dirs(os.path.join(root, dst))
 
-    logger.debug("Running [%s] from [%s]", parsed_cmd, root)
+    logger.info("Running [%s] from [%s]", parsed_cmd, root)
 
     proc = subprocess.Popen(
         args=parsed_cmd,
@@ -120,16 +123,15 @@ def apply_preprocessors(root, src, dst, processors):
     file individually.
     """
     matches = [(pattern, cmds) for pattern, cmds in processors.iteritems() if fnmatch(src, pattern)]
-    if src == dst and not matches:
+    if not matches:
         return False
 
     params = get_format_params(dst)
 
-    src_path = src
     for pattern, cmd_list in matches:
         for cmd in cmd_list:
-            run_command(cmd, root=root, dst=dst, input=src_path, params=params)
-            src_path = dst
+            run_command(cmd, root=root, dst=dst, input=src, params=params)
+            src = dst
 
     return True
 
@@ -144,6 +146,7 @@ def apply_postcompilers(root, src_list, dst, processors):
     matches = [(pattern, cmds) for pattern, cmds in processors.iteritems() if fnmatch(dst, pattern)]
     if not matches:
         ensure_dirs(dst_file)
+        logger.info('Combining [%s] into [%s]', ' '.join(src_list), dst_file)
         # We should just concatenate the files
         with open(dst_file, 'w') as dst_fp:
             for src in src_list:
@@ -199,6 +202,8 @@ class Command(BaseCommand):
 
             logger.info('Processing bundle [%s]', bundle_name)
 
+            root = os.path.join(cache_root, bundle_opts.get('cwd', ''))
+
             for src_path in bundle_opts['src']:
                 # TODO: we should guarantee that you cant preprocess an input
                 # into the same output file
@@ -210,19 +215,13 @@ class Command(BaseCommand):
                 else:
                     dst_path = src_path
 
-                dst_abspath = os.path.join(cache_root, dst_path)
-
-                was_run = apply_preprocessors(
-                    root=cache_root,
+                apply_preprocessors(
+                    root=root,
                     src=src_path,
-                    dst=dst_abspath,
+                    dst=dst_path,
+                    # dst=dst_abspath,
                     processors=bundle_opts.get('preprocessors'),
                 )
-                if was_run:
-                    copy_file(
-                        src=dst_abspath,
-                        dst=os.path.join(settings.STATIC_ROOT, dst_path)
-                    )
 
                 src_outputs.append(dst_path)
 
@@ -231,7 +230,7 @@ class Command(BaseCommand):
                     continue
 
                 apply_postcompilers(
-                    root=cache_root,
+                    root=root,
                     src_list=src_outputs,
                     dst=os.path.join(settings.STATIC_ROOT, bundle_name),
                     processors=bundle_opts.get('postcompilers'),

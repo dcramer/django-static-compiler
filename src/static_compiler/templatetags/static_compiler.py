@@ -43,51 +43,52 @@ def staticbundle(bundle, mimetype=None, **attrs):
     if settings.DEBUG and 'packages' in config and bundle in config['packages']:
         cache_root = os.path.join(settings.STATIC_ROOT, config.get('cache') or DEFAULT_CACHE_DIR)
 
+        bundle_opts = config['packages'][bundle]
+
+        root = os.path.join(cache_root, bundle_opts.get('cwd', ''))
+
         changed = set()
-        src_list = config['packages'][bundle]['src']
+        src_list = bundle_opts['src']
         is_mapping = isinstance(src_list, dict)
 
         for src in src_list:
-            if is_mapping:
-                src_out = get_file_path(src)
-                if not src_out:
-                    changed.add(src)
-                elif not os.path.exists(os.path.join(cache_root, src_list[src])):
-                    changed.add(src)
+            src_path = os.path.join(bundle_opts.get('cwd', ''), src)
+            abs_src = os.path.join(settings.STATIC_ROOT, src_path)
 
-            cached_mtime = BUNDLE_CACHE.get(src)
-            if cached_mtime is None:
-                try:
-                    BUNDLE_CACHE[src] = cached_mtime = os.stat(
-                        os.path.join(cache_root, src)).st_mtime
-                except OSError:
-                    cached_mtime = 0
-
-            abs_src = get_file_path(src)
+            if is_mapping and not os.path.exists(os.path.join(root, src_list[src])):
+                    changed.add(src)
 
             if abs_src is not None:
+                cached_mtime = BUNDLE_CACHE.get(abs_src)
                 current_mtime = os.stat(abs_src).st_mtime
+                if cached_mtime is None:
+                    try:
+                        BUNDLE_CACHE[abs_src] = cached_mtime = current_mtime
+                    except OSError:
+                        cached_mtime = 0
+                else:
+                    cached_mtime = BUNDLE_CACHE[abs_src]
 
                 if current_mtime != cached_mtime:
-                    changed.add(src)
-                    BUNDLE_CACHE[src] = current_mtime
+                    changed.add(src_path)
+                    BUNDLE_CACHE[abs_src] = current_mtime
+
             elif settings.TEMPLATE_DEBUG:
                 raise template.TemplateSyntaxError(
-                    "The source file '%s' could not be located." % src)
+                    "The source file '%s' could not be located." % src_path)
 
         if changed:
             logger.info('Regenerating %s due to changes: %s', bundle, ' '.join(changed))
             call_command('compilestatic', bundle)
 
-        if isinstance(src_list, dict):
-            src_list = src_list.values()
+    #     if isinstance(src_list, dict):
+    #         src_list = src_list.values()
 
-    else:
-        src_list = [bundle]
+    src_list = [bundle]
 
     output = []
-    for src in src_list:
-        url = staticfiles_storage.url(src)
+    for src_path in src_list:
+        url = staticfiles_storage.url(src_path)
 
         # Some storages backends will yield urls with querystring attached
         path = urlparse.urlparse(url).path
