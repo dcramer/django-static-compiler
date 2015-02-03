@@ -1,6 +1,8 @@
 django-static-compiler
 ======================
 
+**This project is no longer maintained**
+
 A static files compiler (JavaScript, CSS, et all) which aims to solve two things:
 
 1. Distributed compressed and uncompresed files with third party applications.
